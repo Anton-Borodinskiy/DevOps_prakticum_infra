@@ -43,7 +43,7 @@ pipeline {
         }
         stage('Send message'){
             steps{
-            sh 'curl -X POST -H "Content-type: application/json" --data "{"text": "Антон Бородинский собрал приложение." }" "https://hooks.slack.com/services/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"'
+            sh 'curl -X POST -H "Content-type: application/json" -d \'{"text": "Антон Бородинский собрал приложение." }\' https://hooks.slack.com/services/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'
             }
         }
     }

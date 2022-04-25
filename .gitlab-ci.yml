@@ -1,7 +1,6 @@
 stages:
   - build
   - release
-  - notify
 
 build-code-job:  # задача с именем build-code-job
   stage: build   # этап build
@@ -37,8 +36,3 @@ upload-release: # задача с именем upload-release
     - > # сохранение артефакта в package registry
       curl -sSL -H "JOB-TOKEN: ${CI_JOB_TOKEN}" 
       -T sausage-store-0.0.1.zip "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/sausage-store/${CI_COMMIT_SHA}/"
-      
-notification-slack:
-  stage: notify 
-  script: 
-    - curl -X POST -H "Content-type: application/json" -d '{"text": "Антон Бородинский собрал ${CI_COMMIT_REF_NAME} в Gitlab." }' https://hooks.slack.com/services/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

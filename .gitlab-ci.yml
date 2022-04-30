@@ -58,6 +58,9 @@ spotbugs-sast:
 sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/backend"
+    GIT_DEPTH: "0"
   script:
     - cd backend
     - >

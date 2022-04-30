@@ -80,11 +80,14 @@ sonarqube-frontend-sast:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/frontend"
     GIT_DEPTH: "0"
   script:
+    - ls
     - cd frontend
+    - ls
     - >
       sonar-scanner
       -Dsonar.qualitygate.wait=true
       -Dsonar.projectKey=${SONAR_PROJECT_KEY}
+      -Dsonar.sources=. \
       -Dsonar.host.url=${SONARQUBE_URL}
       -Dsonar.login=${SONAR_LOGIN}
       -Dsonar.projectName=${SONAR_FRONTEND}

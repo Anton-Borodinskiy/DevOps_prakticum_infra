@@ -2,6 +2,10 @@ stages:
   - build
   - release
   - notify
+  - test
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
 
 build-code-job:  # задача с именем build-code-job
   stage: build   # этап build
@@ -41,6 +45,7 @@ upload-release: # задача с именем upload-release
 notify-slack: # задача с именем upload-release
   stage: notify
   script:
-    - > # сохранение артефакта в package registry
-      curl -X POST -H "Content-type: application/json"
-      -d "{\"text\": \"Антон Бородинский собрал ${CI_COMMIT_REF_NAME} в Gitlab.\" }" https://hooks.slack.com/services/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
+    - > cd ..
+      # сохранение артефакта в package registry
+      # curl -X POST -H "Content-type: application/json"
+      # -d "{\"text\": \"Антон Бородинский собрал ${CI_COMMIT_REF_NAME} в Gitlab.\" }" https://hooks.slack.com/services/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

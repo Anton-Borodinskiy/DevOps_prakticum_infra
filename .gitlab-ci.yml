@@ -39,4 +39,4 @@ notify-slack: # задача с именем upload-release
   script:
     - > # сохранение артефакта в package registry
       curl -X POST -H "Content-type: application/json"
-      -d "{\"text\": \"Вышла новая версия сосисочной — ${VERSION}. Скачать фронт можно по ссылке — ${NEXUS_REPO_URL_FRONT}/${VERSION}/sausage-store-${VERSION}.tar.gz. Скачать бэкенд можно по ссылке — ${NEXUS_REPO_URL_BACK}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar\" }" https://hooks.slack.com/services/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
+      -d "{\"text\": \"Вышла новая версия сосисочной — ${VERSION}. Скачать фронт можно по ссылке — ${NEXUS_REPO_URL_FRONT}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz. Скачать бэкенд можно по ссылке — ${NEXUS_REPO_URL_BACK}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar\" }" https://hooks.slack.com/services/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

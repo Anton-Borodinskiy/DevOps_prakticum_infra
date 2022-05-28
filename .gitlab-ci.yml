@@ -1,8 +1,8 @@
 stages:
   - build
   - release
-  - notify
   - test
+  - notify
 
 include:
   - template: Security/SAST.gitlab-ci.yml
@@ -13,23 +13,23 @@ variables:
 build-code-job:
     stage: build
     script:
-        - echo "ARTIFACT_JOB_ID=${CI_JOB_ID}" > CI_JOB_ID.txt  # сохранение номера задачи в файл, чтобы в дальнейшем использовать для копирования артефакта  
-        - cd backend 
-        - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -Dversion.application=${VERSION} # запуск сборки кода
+        - echo "ARTIFACT_JOB_ID=${CI_JOB_ID}" > CI_JOB_ID.txt
+        - cd backend
+        - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -Dversion.application=${VERSION}
         - cd ../frontend 
-        - npm install # загрузка всех сторонних зависимостей
-        - npm run build # запуск сборки кода
+        - npm install
+        - npm run build
         - cd .. 
-        - mkdir sausage-store-${VERSION}  # создание директории, в которую копируются артефакты. Это нужно для организации удобной структуры архива
-        - mv backend/target/sausage-store-${VERSION}.jar sausage-store-${VERSION}/sausage-store-${VERSION}.jar # копирование собранного бэкенда
-        - mv frontend/dist/frontend sausage-store-${VERSION}/public_html # копирование собранного фронтэнда
+        - mkdir sausage-store-${VERSION}
+        - mv backend/target/sausage-store-${VERSION}.jar sausage-store-${VERSION}/sausage-store-${VERSION}.jar
+        - mv frontend/dist/frontend sausage-store-${VERSION}/public_html
     artifacts:
         paths:
             - sausage-store-${VERSION}/public_html
             - sausage-store-${VERSION}/sausage-store-${VERSION}.jar
-            - ${CI_PROJECT_DIR}/.m2/ # сохранение зависимостей для SAST
+            - ${CI_PROJECT_DIR}/.m2/
         reports:
-            dotenv: CI_JOB_ID.txt # сохранение файла с переменными как артефакт
+            dotenv: CI_JOB_ID.txt
 
 upload-release:
   stage: release
@@ -40,14 +40,6 @@ upload-release:
     - tar czvf sausage-store-${VERSION}.tar.gz sausage-store-${VERSION}
     - >
       curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" --upload-file sausage-store-${VERSION}.tar.gz ${NEXUS_REPO_URL_FRONT}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz
-
-
-notify-slack: # задача с именем upload-release
-  stage: notify
-  script:
-    - > # сохранение артефакта в package registry
-      curl -X POST -H "Content-type: application/json"
-      -d "{\"text\": \"Вышла новая версия сосисочной — ${VERSION}. Скачать фронт можно по ссылке — ${NEXUS_REPO_URL_FRONT}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz. Скачать бэкенд можно по ссылке — ${NEXUS_REPO_URL_BACK}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar\" }" https://hooks.slack.com/services/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
 
 spotbugs-sast:
     variables:
@@ -88,3 +80,12 @@ sonarqube-frontend-sast:
       -Dsonar.host.url=${SONARQUBE_URL}
       -Dsonar.login=${SONAR_LOGIN}
       -Dsonar.projectName=${SONAR_FRONTEND}
+
+
+notify-slack: # задача с именем upload-release
+  stage: notify
+  script:
+    - > # сохранение артефакта в package registry
+      curl -X POST -H "Content-type: application/json"
+      -d "{\"text\": \"Вышла новая версия сосисочной — ${VERSION}. Скачать фронт можно по ссылке — ${NEXUS_REPO_URL_FRONT}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz. Скачать бэкенд можно по ссылке — ${NEXUS_REPO_URL_BACK}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar\" }" https://hooks.slack.com/services/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
+

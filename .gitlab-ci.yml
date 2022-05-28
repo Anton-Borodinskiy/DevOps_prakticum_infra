@@ -1,7 +1,7 @@
 stages:
   - build
   - release
-#  - notify
+  - notify
 
 variables:
     VERSION: 1.0.${CI_PIPELINE_ID}
@@ -33,10 +33,10 @@ upload-release:
     - >
       curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" --upload-file sausage-store-${VERSION}.tar.gz ${NEXUS_REPO_URL_FRONT}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz
 
-#
-#notify-slack: # задача с именем upload-release
-#  stage: notify
-#  script:
-#    - > # сохранение артефакта в package registry
-#      curl -X POST -H "Content-type: application/json"
-#      -d "{\"text\": \"Антон Бородинский собрал ${CI_COMMIT_REF_NAME} в Gitlab.\" }" https://hooks.slack.com/services/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
+
+notify-slack: # задача с именем upload-release
+  stage: notify
+  script:
+    - > # сохранение артефакта в package registry
+      curl -X POST -H "Content-type: application/json"
+      -d "{\"text\": \"Вышла новая версия сосисочной — ${VERSION}. Скачать фронт можно по ссылке — ${NEXUS_REPO_URL_FRONT}/${VERSION}/sausage-store-${VERSION}.tar.gz. Скачать бэкенд можно по ссылке — ${NEXUS_REPO_URL_BACK}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar\" }" https://hooks.slack.com/services/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

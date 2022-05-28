@@ -1,91 +1,41 @@
 stages:
   - build
   - release
-  - notify
-  - test
+#  - notify
 
-include:
-  - template: Security/SAST.gitlab-ci.yml
+variables:
+    VERSION: 1.0.${CI_PIPELINE_ID}
 
-build-code-job:  # задача с именем build-code-job
-  stage: build   # этап build
-  script:        # объявление скрипта
-    - echo "ARTIFACT_JOB_ID=${CI_JOB_ID}" > CI_JOB_ID.txt  # сохранение номера задачи в файл, чтобы в дальнейшем использовать для копирования артефакта  
-    - cd backend 
-    - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository # запуск сборки кода
-    - cd ../frontend 
-    - npm install # загрузка всех сторонних зависимостей
-    - npm run build # запуск сборки кода
-    - cd .. 
-    - mkdir sausage-store-0.0.1  # создание директории, в которую копируются артефакты. Это нужно для организации удобной структуры архива
-    - mv backend/target/sausage-store-0.0.1-SNAPSHOT.jar sausage-store-0.0.1/sausage-store-0.0.1.jar # копирование собранного бэкенда
-    - mv frontend/dist/frontend sausage-store-0.0.1/public_html # копирование собранного фронтэнда
-  artifacts:
-    paths:
-      - sausage-store-0.0.1/public_html  # сохранение собранного фронтэнда как артефакт
-      - sausage-store-0.0.1/sausage-store-0.0.1.jar # сохранение собранного бэкенда как артефакт
-      - ${CI_PROJECT_DIR}/.m2/ # сохранение зависимостей для SAST
-    reports:
-      dotenv: CI_JOB_ID.txt # сохранение файла с переменными как артефакт
+build-code-job:
+    stage: build
+    script:
+        - cd backend
+        - mvn package -Dversion.application=${VERSION}
+        - cd ../frontend
+        - npm install
+        - npm run build
+        - cd ..
+        - mkdir sausage-store-${VERSION}
+        - mv backend/target/sausage-store-${VERSION}.jar sausage-store-${VERSION}/sausage-store-${VERSION}.jar
+        - mv frontend/dist/frontend sausage-store-${VERSION}/public_html
+    artifacts:
+        paths:
+            - sausage-store-${VERSION}/public_html
+            - sausage-store-${VERSION}/sausage-store-${VERSION}.jar
 
-upload-release: # задача с именем upload-release
-  stage: release # этап release
-  # only: # запуск этого шага только при изменениях в директориях backend и frontend
-  #   changes:
-  #   - backend//*
-  #   - frontend//*
-  script: 
-    - echo "Get artifact from job ${ARTIFACT_JOB_ID}" 
-    - > # скачивание артефакта в файл sausage-store-0.0.1.zip
-      curl --location --output sausage-store-0.0.1.zip -H "PRIVATE-TOKEN: ${MY_TOKEN}" 
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/jobs/${ARTIFACT_JOB_ID}/artifacts"
-    - > # сохранение артефакта в package registry
-      curl -sSL -H "JOB-TOKEN: ${CI_JOB_TOKEN}" 
-      -T sausage-store-0.0.1.zip "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/sausage-store/${CI_COMMIT_SHA}/"
-
-notify-slack: # задача с именем upload-release
-  stage: notify
-  script:
-    - > # сохранение артефакта в package registry
-      curl -X POST -H "Content-type: application/json"
-      -d "{\"text\": \"Антон Бородинский собрал ${CI_COMMIT_REF_NAME} в Gitlab.\" }" https://hooks.slack.com/services/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
-
-spotbugs-sast:
-  variables:
-    COMPILE: "false"
-    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
-
-sonarqube-backend-sast:
-  stage: test
-  image: maven:3.8-openjdk-16
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/backend"
-    GIT_DEPTH: "0"
+upload-release:
+  stage: release
   script:
     - cd backend
+    - mvn -s settings.xml deploy -DskipTests
+    - tar czvf sausage-store-${VERSION}.tar.gz sausage-store-${VERSION}
     - >
-      mvn verify sonar:sonar
-      -Dsonar.qualitygate.wait=true
-      -Dsonar.projectKey=${SONAR_PROJECT_KEY_BACKEND}
-      -Dsonar.host.url=${SONARQUBE_URL}
-      -Dsonar.login=${SONAR_LOGIN}
-      -Dsonar.projectName=${SONAR_BACKEND}
+      curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" --upload-file sausage-store-${VERSION}.tar.gz ${NEXUS_REPO_URL_FRONT}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz
 
-sonarqube-frontend-sast:
-  stage: test
-  image:
-    name: sonarsource/sonar-scanner-cli:latest
-    entrypoint: [""]
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/frontend"
-    GIT_DEPTH: "0"
-  script:
-    - cd frontend
-    - >
-      sonar-scanner
-      -Dsonar.qualitygate.wait=true
-      -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONTEND}
-      -Dsonar.sources=.
-      -Dsonar.host.url=${SONARQUBE_URL}
-      -Dsonar.login=${SONAR_LOGIN}
-      -Dsonar.projectName=${SONAR_FRONTEND}
+#
+#notify-slack: # задача с именем upload-release
+#  stage: notify
+#  script:
+#    - > # сохранение артефакта в package registry
+#      curl -X POST -H "Content-type: application/json"
+#      -d "{\"text\": \"Антон Бородинский собрал ${CI_COMMIT_REF_NAME} в Gitlab.\" }" https://hooks.slack.com/services/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

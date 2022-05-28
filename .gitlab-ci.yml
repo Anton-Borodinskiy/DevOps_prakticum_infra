@@ -1,91 +1,22 @@
 stages:
-  - build
-  - test
-  - release
-  - notify
+  - module-pipelines
 
-include:
-  - template: Security/SAST.gitlab-ci.yml
+frontend:
+  stage: module-pipelines
+  trigger:
+    include:
+      - "/frontend/.gitlab-ci.yml"
+    strategy: depend #depend нужен, если какой-нибудь дочерний пайплайн свалился, мы знали, что общий пайплайн тоже идёт с ошибкой
+  only:
+    changes: #как только происходит изменение в папке frontend, запускается дочерний пайплайн, который лежит в этой папке
+      - frontend/**/*
 
-variables:
-    VERSION: 1.0.${CI_PIPELINE_ID}
-
-build-code-job:
-    stage: build
-    script:
-        - echo "ARTIFACT_JOB_ID=${CI_JOB_ID}" > CI_JOB_ID.txt
-        - cd backend
-        - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -Dversion.application=${VERSION}
-        - cd ../frontend 
-        - npm install
-        - npm run build
-        - cd .. 
-        - mkdir sausage-store-${VERSION}
-        - mv backend/target/sausage-store-${VERSION}.jar sausage-store-${VERSION}/sausage-store-${VERSION}.jar
-        - mv frontend/dist/frontend sausage-store-${VERSION}/public_html
-    artifacts:
-        paths:
-            - sausage-store-${VERSION}/public_html
-            - sausage-store-${VERSION}/sausage-store-${VERSION}.jar
-            - ${CI_PROJECT_DIR}/.m2/
-        reports:
-            dotenv: CI_JOB_ID.txt
-
-upload-release:
-  stage: release
-  script:
-    - cd backend
-    - mvn -s settings.xml deploy -DskipTests
-    - cd ../
-    - tar czvf sausage-store-${VERSION}.tar.gz sausage-store-${VERSION}
-    - >
-      curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" --upload-file sausage-store-${VERSION}.tar.gz ${NEXUS_REPO_URL_FRONT}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz
-
-spotbugs-sast:
-    variables:
-        COMPILE: "false"
-        MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
-
-sonarqube-backend-sast:
-  stage: test
-  image: maven:3.8-openjdk-16
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/backend"
-    GIT_DEPTH: "0"
-  script:
-    - cd backend
-    - >
-      mvn verify sonar:sonar
-      -Dsonar.qualitygate.wait=true
-      -Dsonar.projectKey=${SONAR_PROJECT_KEY_BACKEND}
-      -Dsonar.host.url=${SONARQUBE_URL}
-      -Dsonar.login=${SONAR_LOGIN}
-      -Dsonar.projectName=${SONAR_BACKEND}
-
-sonarqube-frontend-sast:
-  stage: test
-  image:
-    name: sonarsource/sonar-scanner-cli:latest
-    entrypoint: [""]
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/frontend"
-    GIT_DEPTH: "0"
-  script:
-    - cd frontend
-    - >
-      sonar-scanner
-      -Dsonar.qualitygate.wait=true
-      -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONTEND}
-      -Dsonar.sources=.
-      -Dsonar.host.url=${SONARQUBE_URL}
-      -Dsonar.login=${SONAR_LOGIN}
-      -Dsonar.projectName=${SONAR_FRONTEND}
-
-
-notify-slack: # задача с именем upload-release
-  stage: notify
-  script:
-    - > # сохранение артефакта в package registry
-      curl -X POST -H "Content-type: application/json"
-      -d "{\"text\": \"Вышла новая версия сосисочной — ${VERSION}. Скачать фронт можно по ссылке — ${NEXUS_REPO_URL_FRONT}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz. Скачать бэкенд можно по ссылке — ${NEXUS_REPO_URL_BACK}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar\" }" https://hooks.slack.com/services/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
-
+backend:
+  stage: module-pipelines
+  trigger:
+    include:
+      - "/backend/.gitlab-ci.yml"
+    strategy: depend 
+  only:
+    changes:  #как только происходит изменение в папке backend, запускается дочерний пайплайн, который лежит в этой папке
+      - backend/**/*

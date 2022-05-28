@@ -13,6 +13,13 @@
     <version>${VERSION}</version>
     <name>sausage-store</name>
     <description>Backend for sausage-store</description>
+    <distributionManagement>
+        <repository>
+            <id>sausage-store-anton-borodinskiy-backend</id>
+            <name>sausage-store-anton-borodinskiy-backend</name>
+            <url>${env.NEXUS_REPO_URL_BACK}</url>
+        </repository>
+</distributionManagement>
     <properties>
         <java.version>16</java.version>
         <sonar.projectKey>test_manual</sonar.projectKey>
@@ -116,12 +123,4 @@
             </plugin>
         </plugins>
     </build>
-
-<distributionManagement>
-  <repository>
-       <id>sausage-store</id>
-       <name>sausage-store</name>
-       <url>${env.NEXUS_REPO_URL_BACK}</url>
-   </repository>
-</distributionManagement>
 </project>

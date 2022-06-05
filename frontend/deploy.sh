@@ -3,7 +3,7 @@ set -xe
 sudo cp -rf sausage-store-frontend.service /etc/systemd/system/sausage-store-frontend.service
 sudo rm -rf /var/www-data/dist/frontend/*
 
-curl -u ${NEXUS_REPO_USER}:${NEXUS_REPO_PASS} -o sausage-store-${VERSION}.tar.gz ${NEXUS_REPO_URL}sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz
+curl -u ${NEXUS_REPO_USER}:${NEXUS_REPO_PASS} -o sausage-store-${VERSION}.tar.gz ${NEXUS_REPO_URL}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz
 
 
 sudo mkdir -p /tmp/sausage-store-frontend-${VERSION}

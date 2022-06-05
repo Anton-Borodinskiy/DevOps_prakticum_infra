@@ -59,8 +59,8 @@ sonarqube-frontend-sast:
            - frontend/*
 
 notify-slack: # задача с именем upload-release
-  stage: notify
-  script:
+   stage: notify
+   script:
     - > # сохранение артефакта в package registry
       curl -X POST -H "Content-type: application/json"
       -d "{\"text\": \"Вышла новая версия фронта сосисочной — ${VERSION}. Скачать фронт можно по ссылке — ${NEXUS_REPO_URL_FRONT}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz.}" https://hooks.slack.com/services/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

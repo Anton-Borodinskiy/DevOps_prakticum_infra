@@ -28,9 +28,11 @@ release:
 deploy:
   stage: deploy
   script:
-  - ssh ${DEV_USER}@${DEV_HOST}
-  # скачиваем ранее собранный артефакт с Nexus. При этом необходимо заранее
-  # прописать креды от Nexus в переменные в настройке пайплайна
-  - curl -u ${NEXUS_REPO_USER}:${NEXUS_REPO_PASS} -o sausage-store-${VERSION}.jar ${NEXUS_REPO_URL_BACK}com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar
- # запускаем бэкенд
-  - java -jar sausage-store-${VERSION}.jar &
+      - ssh ${DEV_USER}@${DEV_HOST}
+      # скачиваем ранее собранный артефакт с Nexus. При этом необходимо заранее
+      # прописать креды от Nexus в переменные в настройке пайплайна
+      -ls
+      - curl -u ${NEXUS_REPO_USER}:${NEXUS_REPO_PASS} -o sausage-store-${VERSION}.jar ${NEXUS_REPO_URL_BACK}com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar
+      # запускаем бэкенд
+      - ls
+      - java -jar sausage-store-${VERSION}.jar &

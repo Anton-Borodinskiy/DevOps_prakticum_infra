@@ -33,12 +33,12 @@ build:
            - backend/*
 
 sonarqube-backend-sast:
-  stage: test
-  image: maven:3.8-openjdk-16
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/backend"
-    GIT_DEPTH: "0"
-  script:
+   stage: test
+   image: maven:3.8-openjdk-16
+   variables:
+      SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/backend"
+      GIT_DEPTH: "0"
+   script:
     - cd backend
     - >
       mvn verify sonar:sonar
@@ -47,8 +47,6 @@ sonarqube-backend-sast:
       -Dsonar.host.url=${SONARQUBE_URL}
       -Dsonar.login=${SONAR_LOGIN}
       -Dsonar.projectName=${SONAR_BACKEND}
-
-
 
 release:
    stage: release
@@ -58,23 +56,6 @@ release:
    rules:
       - changes:
            - backend/*
-
-sonarqube-backend-sast:
-  stage: test
-  image: maven:3.8-openjdk-16
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/backend"
-    GIT_DEPTH: "0"
-  script:
-    - cd backend
-    - >
-      mvn verify sonar:sonar
-      -Dsonar.qualitygate.wait=true
-      -Dsonar.projectKey=${SONAR_PROJECT_KEY_BACKEND}
-      -Dsonar.host.url=${SONARQUBE_URL}
-      -Dsonar.login=${SONAR_LOGIN}
-      -Dsonar.projectName=${SONAR_BACKEND}
-
 
 notify-slack: # задача с именем upload-release
   stage: notify

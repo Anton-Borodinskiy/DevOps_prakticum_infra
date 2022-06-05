@@ -37,14 +37,14 @@ release:
            - frontend/*
 
 sonarqube-frontend-sast:
-  stage: test
-  image:
-    name: sonarsource/sonar-scanner-cli:latest
-    entrypoint: [""]
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/frontend"
-    GIT_DEPTH: "0"
-  script:
+   stage: test
+   image:
+      name: sonarsource/sonar-scanner-cli:latest
+      entrypoint: [""]
+   variables:
+      SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/frontend"
+      GIT_DEPTH: "0"
+   script:
     - cd frontend
     - >
       sonar-scanner

@@ -1,9 +1,14 @@
 variables:
    VERSION: 1.0.${CI_PIPELINE_ID}
 
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
 stages:
    - build
+   - test
    - release
+   - notify
    - deploy
 
 build:
@@ -30,6 +35,40 @@ release:
    rules:
       - changes:
            - frontend/*
+
+sonarqube-frontend-sast:
+  stage: test
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/frontend"
+    GIT_DEPTH: "0"
+  script:
+    - cd frontend
+    - >
+      sonar-scanner
+      -Dsonar.qualitygate.wait=true
+      -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONTEND}
+      -Dsonar.sources=.
+      -Dsonar.host.url=${SONARQUBE_URL}
+      -Dsonar.login=${SONAR_LOGIN}
+      -Dsonar.projectName=${SONAR_FRONTEND}
+   rules:
+      - changes:
+           - frontend/*
+
+notify-slack: # задача с именем upload-release
+  stage: notify
+  script:
+    - > # сохранение артефакта в package registry
+      curl -X POST -H "Content-type: application/json"
+      -d "{\"text\": \"Вышла новая версия фронта сосисочной — ${VERSION}. Скачать фронт можно по ссылке — ${NEXUS_REPO_URL_FRONT}/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz.}" https://hooks.slack.com/services/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
+   rules:
+      - changes:
+           - frontend/*
+
+
 
 deploy:
   stage: deploy

@@ -19,6 +19,7 @@ catprop:
   stage: catprop
   script:
     - cat backend/src/main/resources/application.properties
+    - echo $PSQL_DB
 build:
    stage: build
    script:

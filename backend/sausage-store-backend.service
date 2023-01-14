@@ -12,7 +12,11 @@ ExecStart=/usr/bin/java \
 -Dmyserver.basePath='/home/jarservice/' \
 -Dmyserver.bindAddr='127.0.0.1' \
 -Dmyserver.hostName='Sausage-store' \
--jar '/home/jarservice/sausage-store.jar'
+-jar '/home/jarservice/sausage-store.jar' \
+--spring.datasource.url=jdbc:postgresql://rc1b-5y9bn5sgesewht1l.mdb.yandexcloud.net:6432/Borodinskiy26 \
+--spring.datasource.username=Borodinskiy26 \
+--spring.datasource.password=Testusr1234 \
+--spring.data.mongodb.uri=mongodb://Borodinskiy26:Testusr1234@rs01/rc1b-i501k9ruzubovb2x.mdb.yandexcloud.net:27018/Borodinskiy26?tls=true&replicaSet=rs01
 SuccessExitStatus=143
 
 [Install]

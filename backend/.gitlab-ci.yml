@@ -6,9 +6,12 @@ variables:
 
 include:
   - template: Security/SAST.gitlab-ci.yml
+  - project: 'templates/ci'
+    file: 'DockerInDockerTemplate.yml'
 
 stages:
    - build
+   - build_docker
    - test
    - release
    - notify
@@ -33,6 +36,22 @@ build:
       - changes:
            - backend/*
 
+build-backend:
+  stage: build_docker
+  image: docker:20.10.12-dind-rootless
+  before_script:
+    - until docker info; do sleep 1; done
+    # переменные CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY генерятся Гитлабом, их задавать не надо
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - cd backend
+    - >
+      docker build
+      --build-arg VERSION=$VERSION
+      --tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
+      .
+    - docker push $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
+
 sonarqube-backend-sast:
    stage: test
    image: maven:3.8-openjdk-16
@@ -49,14 +68,19 @@ sonarqube-backend-sast:
       -Dsonar.login=${SONAR_LOGIN}
       -Dsonar.projectName=${SONAR_BACKEND}
 
-release:
-   stage: release
-   script:
-      - cd backend
-      - mvn deploy -DskipTests -Dversion.application=${VERSION} -Dmaven.repo.local=${MAVEN_REPO_PATH} -s settings.xml
-   rules:
-      - changes:
-           - backend/*
+upload-backend-latest:
+  variables:
+    GIT_STRATEGY: none
+  image: docker:20.10.12-dind-rootless
+  stage: release
+  before_script:
+    - until docker info; do sleep 1; done
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker pull $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
+    # если образ прошел проверки в CI (сканирование, тесты и т.д), то тегаем latest
+    - docker tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE/sausage-backend:latest
+    - docker push $CI_REGISTRY_IMAGE/sausage-backend:latest
 
 notify-slack: # задача с именем upload-release
    stage: notify
@@ -68,20 +92,28 @@ notify-slack: # задача с именем upload-release
       - changes:
            - backend/*
 
-deploy:
+deploy-backend:
   stage: deploy
+  image: alpine:3.15.0
+  # если хотим сделать деплой по кнопке
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: manual
   before_script:
-      #устанавливаем ssh-agent для удобства аутентификации по ssh
-      - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
-      - eval $(ssh-agent -s)
-      #сохраняем сгенеренный ранее приватный ключ для раннера 
-      - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-      - mkdir -p ~/.ssh
-      - chmod 600 ~/.ssh
-      - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
-      - chmod 644 ~/.ssh/known_hosts
+    - apk add openssh-client bash
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
   script:
-    - scp ./backend/sausage-store-backend.service ${DEV_USER}@${DEV_HOST}:/home/${DEV_USER}/sausage-store-backend.service
-    - ssh ${DEV_USER}@${DEV_HOST} "export "CURRENT_VERSION=${VERSION}"; export "PSQL_DB=${PSQL_DB}"; export "MONGO_PASS=${MONGO_PASS}"; export "MONGO_USER=${MONGO_USER}"; export "MONGO_HOST=${MONGO_HOST}"; export "MONGO_DB=${MONGO_DB}"; export "PSQL_PASS=${PSQL_PASS}"; export "PSQL_USER=${PSQL_USER}"; export "VERSION=${VERSION}"; export "DEV_HOST=${DEV_HOST}";export "NEXUS_REPO_URL=${NEXUS_REPO_URL_BACK}"; export "NEXUS_REPO_USER=${NEXUS_REPO_USER}"; export "NEXUS_REPO_PASS=${NEXUS_REPO_PASS}";setsid /bin/bash -s " < ./backend/deploy.sh
-  environment:
-      name: staging
+    - ssh ${DEV_USER}@${DEV_HOST}
+      "export "VERSION=${VERSION}";
+       export "SPRING_DATASOURCE_URL=${PSQL_DATASOURCE}";
+       export "SPRING_DATASOURCE_USERNAME=${PSQL_USER}";
+       export "SPRING_DATASOURCE_PASSWORD=${PSQL_PASS}";
+       export "SPRING_DATA_MONGODB_URI=${MONGO_DATA}";
+      /bin/bash -s " < ./backend/backend_deploy.sh

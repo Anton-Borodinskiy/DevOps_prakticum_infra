@@ -1,3 +1,4 @@
+# build
 FROM maven:3.8.2-openjdk-16-slim as builder
 # задаём переменную VERSION, которая будет использоваться для сборки проекта
 ARG VERSION=${VERSION}
@@ -26,3 +27,4 @@ COPY --chown=jaruser:jaruser \
 EXPOSE 8080
 # приложение будет запускаться под пользователем jaruser
 USER jaruser
+ENTRYPOINT ["dumb-init", "java", "-jar", "-Dmyserver.bindPort=8080", "./sausage-store.jar"] 

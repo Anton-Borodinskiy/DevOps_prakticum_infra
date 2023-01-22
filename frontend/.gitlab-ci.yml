@@ -45,9 +45,9 @@ build-frontend:
       --tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
       .
     - docker push $CI_REGISTRY_IMAGE/sausage-frontend:$CI_COMMIT_SHA
-   rules:
-      - changes:
-           - frontend/*
+  rules:
+    - changes:
+        - frontend/*
 
 upload-frontend-latest:
   variables:

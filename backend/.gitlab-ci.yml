@@ -108,13 +108,13 @@ deploy-backend:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+    - echo ${MONGO_DATA}
     - chmod 644 ~/.ssh/known_hosts
-    - ls ${MONGO_DATA}
   script:
     - ssh ${DEV_USER}@${DEV_HOST}
       "export "VERSION=${VERSION}";
        export "SPRING_DATASOURCE_URL=${PSQL_DATASOURCE}";
        export "SPRING_DATASOURCE_USERNAME=${PSQL_USER}";
        export "SPRING_DATASOURCE_PASSWORD=${PSQL_PASS}";
-       export "SPRING_DATA_MONGODB_URI=${MONGO_DATA}";
+       export "SPRING_DATA_MONGODB_URI=mongodb://${MONGO_DATA}";
       /bin/bash -s " < ./backend/deploy.sh

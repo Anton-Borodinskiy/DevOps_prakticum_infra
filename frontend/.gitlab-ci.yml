@@ -29,7 +29,7 @@ build:
          - sausage-store-${VERSION}/public_html
    rules:
     - changes:
-      - backend/*
+      - frontend/*
 
 build-frontend:
   stage: build

@@ -31,9 +31,9 @@ build:
       - sausage-store-${VERSION}/sausage-store-${VERSION}.jar
     reports:
       dotenv: CI_JOB_ID.txt
-    rules:
-      - changes:
-        - backend/*
+  rules:
+    - changes:
+      - backend/*
 
 build-backend:
   stage: build

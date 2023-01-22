@@ -118,4 +118,5 @@ deploy-backend:
        export "SPRING_DATASOURCE_USERNAME=${PSQL_USER}";
        export "SPRING_DATASOURCE_PASSWORD=${PSQL_PASS}";
        export "SPRING_DATA_MONGODB_URI=${MONGO_DATA}";
+       docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY;
       /bin/bash -s " < ./backend/deploy.sh

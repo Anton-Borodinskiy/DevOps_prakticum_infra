@@ -117,5 +117,6 @@ deploy-frontend:
     - chmod 644 ~/.ssh/known_hosts
   script:
     - ssh ${DEV_USER}@${DEV_HOST}
-      "/bin/bash -s " < ./frontend/deploy.sh
+      "docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY;
+      /bin/bash -s " < ./frontend/deploy.sh
 

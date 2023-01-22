@@ -109,6 +109,7 @@ deploy-backend:
     - chmod 700 ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
+    - ls ${MONGO_DATA}
   script:
     - ssh ${DEV_USER}@${DEV_HOST}
       "export "VERSION=${VERSION}";

@@ -28,8 +28,8 @@ build:
       paths:
          - sausage-store-${VERSION}/public_html
    rules:
-      - changes:
-           - frontend/*
+    - changes:
+      - backend/*
 
 build-frontend:
   stage: build

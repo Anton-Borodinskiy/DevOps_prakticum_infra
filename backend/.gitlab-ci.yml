@@ -50,9 +50,9 @@ build-backend:
       --tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
       .
     - docker push $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
-   rules:
-      - changes:
-           - backend/*
+  rules:
+    - changes:
+      - backend/*
 
 sonarqube-backend-sast:
    stage: test

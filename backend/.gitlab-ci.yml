@@ -11,7 +11,6 @@ include:
 
 stages:
    - build
-   - build_docker
    - test
    - release
    - notify
@@ -33,11 +32,11 @@ build:
     reports:
       dotenv: CI_JOB_ID.txt
    rules:
-      - changes:
-           - backend/*
+    - changes:
+      - backend/*
 
 build-backend:
-  stage: build_docker
+  stage: build
   image: docker:20.10.12-dind-rootless
   before_script:
     - until docker info; do sleep 1; done
@@ -51,6 +50,9 @@ build-backend:
       --tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
       .
     - docker push $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
+  rules:
+    - changes:
+      - backend/*
 
 sonarqube-backend-sast:
    stage: test
@@ -116,4 +118,5 @@ deploy-backend:
        export "SPRING_DATASOURCE_USERNAME=${PSQL_USER}";
        export "SPRING_DATASOURCE_PASSWORD=${PSQL_PASS}";
        export "SPRING_DATA_MONGODB_URI=${MONGO_DATA}";
+       docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY;
       /bin/bash -s " < ./backend/deploy.sh

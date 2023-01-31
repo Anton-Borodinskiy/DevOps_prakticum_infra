@@ -1,5 +1,5 @@
 # build
-FROM cr.yandex/crp4v5843a482vqmajv8/maven:3.8.2-openjdk-16 as builder
+FROM maven:3.8.2-openjdk-16 as builder
 # задаём переменную VERSION, которая будет использоваться для сборки проекта
 ARG VERSION=${VERSION}
 WORKDIR /usr/src/app

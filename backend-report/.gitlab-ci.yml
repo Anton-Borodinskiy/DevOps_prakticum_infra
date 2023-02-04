@@ -4,8 +4,16 @@ include:
 
 stages:
    - build
+   - test
    - release
    - deploy
+
+build-for-test:
+  stage: build
+  script:
+    - cd backend-report
+    - apt install python3-pip
+    - pip3 install -r requirements.txt
 
 build-backend:
   stage: build
@@ -25,6 +33,13 @@ build-backend:
   rules:
     - changes:
       - backend-report/*
+
+test-backend:
+  stage: test
+  script:
+    - cd backend-report
+    - export SPRING_DATA_MONGODB_URI=123
+    - python3 -m unittest
 
 upload-backend-latest:
   variables:

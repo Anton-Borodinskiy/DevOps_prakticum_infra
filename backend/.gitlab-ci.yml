@@ -96,7 +96,7 @@ notify-slack: # задача с именем upload-release
 
 deploy-backend:
   stage: deploy
-  image: vault:1.11.3
+  image: docker:20.10.12-dind
   # если хотим сделать деплой по кнопке
 #  rules:
 #    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -104,20 +104,23 @@ deploy-backend:
 #    - if: '$CI_COMMIT_BRANCH == "main"'
 #      when: manual
   before_script:
-    - apk add openssh-client bash
+    - apk add openssh-client bash docker-compose
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
+    - docker context create remote --docker "host=ssh://${DEV_USER}@${DEV_HOST}"
+    - docker --context remote login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=sausage-store jwt=$CI_JOB_JWT)"
-    - ssh ${DEV_USER}@${DEV_HOST}
-      "export "VERSION=${VERSION}";
-       export "SPRING_DATASOURCE_URL=$(vault kv get -field=spring.datasource.url secret/sausage-store)";
-       export "SPRING_DATASOURCE_USERNAME=$(vault kv get -field=spring.datasource.username secret/sausage-store)";
-       export "SPRING_DATASOURCE_PASSWORD=$(vault kv get -field=spring.datasource.password secret/sausage-store)";
-       export "SPRING_DATA_MONGODB_URI=$(vault kv get -field=spring.data.mongodb.uri secret/sausage-store)";
-       docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY;
-      /bin/bash -s " < ./backend/deploy.sh
+    - docker-compose -H ssh://${DEV_USER}@${DEV_HOST} up -d --force-recreate backend
+#    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=sausage-store jwt=$CI_JOB_JWT)"
+#    - ssh ${DEV_USER}@${DEV_HOST}
+#      "export "VERSION=${VERSION}";
+#       export "SPRING_DATASOURCE_URL=$(vault kv get -field=spring.datasource.url secret/sausage-store)";
+#       export "SPRING_DATASOURCE_USERNAME=$(vault kv get -field=spring.datasource.username secret/sausage-store)";
+#       export "SPRING_DATASOURCE_PASSWORD=$(vault kv get -field=spring.datasource.password secret/sausage-store)";
+#       export "SPRING_DATA_MONGODB_URI=$(vault kv get -field=spring.data.mongodb.uri secret/sausage-store)";
+#       docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY;
+#      /bin/bash -s " < ./backend/deploy.sh

@@ -35,11 +35,11 @@ build-for-test:
 test-backend:
   stage: test
   script:
+    - cd backend-report
     - export DB=${DB_PYTHON}
     - apt update
     - apt install python3-pip -y
     - pip3 install -r requirements.txt
-    - cd backend-report
     - python3 -m unittest
 
 upload-backend-latest:

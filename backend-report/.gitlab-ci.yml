@@ -12,8 +12,7 @@ build-for-test:
   stage: build
   script:
     - cd backend-report
-    - apt install python3-pip -y
-    - pip3 install -r requirements.txt
+    - pip install -r requirements.txt
 
 build-backend:
   stage: build
@@ -37,9 +36,8 @@ build-backend:
 test-backend:
   stage: test
   script:
-    - cd backend-report
     - export SPRING_DATA_MONGODB_URI=123
-    - python3 -m unittest
+    - python -m unittest
 
 upload-backend-latest:
   variables:

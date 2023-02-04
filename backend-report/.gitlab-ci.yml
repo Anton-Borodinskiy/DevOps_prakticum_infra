@@ -8,11 +8,6 @@ stages:
    - release
    - deploy
 
-build-for-test:
-  stage: build
-  script:
-    - cd backend-report
-
 build-backend:
   stage: build
   image: docker:20.10.12-dind-rootless

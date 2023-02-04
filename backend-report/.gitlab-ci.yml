@@ -12,7 +12,7 @@ build-for-test:
   stage: build
   script:
     - cd backend-report
-    - apt install python3-pip
+    - apt install python3-pip -y
     - pip3 install -r requirements.txt
 
 build-backend:

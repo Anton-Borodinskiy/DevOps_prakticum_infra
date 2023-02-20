@@ -8,3 +8,5 @@ RUN npm run build
 FROM nginxproxy/nginx-proxy
 COPY --from=builder /usr/src/app/dist/frontend /usr/share/nginx/html
 COPY nginx.tmpl /app/nginx.tmpl
+
+EXPOSE 80

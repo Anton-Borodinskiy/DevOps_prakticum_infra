@@ -5,6 +5,7 @@ services:
     image: gitlab.praktikum-services.ru:5050/anton-borodinskiy/sausage-store/sausage-backend:latest
     container_name: sausage-backend
     environment:
+      VIRTUAL_HOST: "backend"
       # Переменные из application.properties можно заменить переменными окружения
       SPRING_DATASOURCE_USERNAME: ${PSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${PSQL_PASS}
@@ -26,8 +27,15 @@ services:
   frontend:
     image: gitlab.praktikum-services.ru:5050/anton-borodinskiy/sausage-store/sausage-frontend:latest
     container_name: sausage-frontend
+    restart: always
+    environment:
+      DEFAULT_HOST: "backend"
+      VIRTUAL_PORT: "8080"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     ports:
       - "80:80"
+
     networks:
       - sausage-store
 

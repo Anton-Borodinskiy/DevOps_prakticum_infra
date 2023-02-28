@@ -118,10 +118,9 @@ deploy-backend:
     - ssh ${DEV_USER}@${DEV_HOST}
        export "SPRING_DATASOURCE_URL=${PSQL_DATASOURCE}";
        export "SPRING_DATASOURCE_USERNAME=${PSQL_USER}";
-       export "$CI_REGISTRY=${$CI_REGISTRY}";
-       export "$CI_REGISTRY_USER=${$CI_REGISTRY_USER}";
-       export "$CI_REGISTRY_PASSWORD=${$CI_REGISTRY_PASSWORD}";
+       export "CI_REGISTRY=${CI_REGISTRY}";
+       export "CI_REGISTRY_USER=${CI_REGISTRY_USER}";
+       export "CI_REGISTRY_PASSWORD=${CI_REGISTRY_PASSWORD}";
        export "SPRING_DATASOURCE_PASSWORD=${PSQL_PASS}";
        export "SPRING_CLOUD_VAULT_TOKEN=${VAULT_TOKEN}";
-       docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY;
       /bin/bash -s " < ./backend/deploy.sh

@@ -1,98 +1,98 @@
 variables:
    VERSION: 1.0.${CI_PIPELINE_ID}
-#   MAVEN_REPO_PATH: ./.m2/repository
-#   JAVA_OPTS: -XX:MaxRAMPercentage=90
-#   SAST_EXCLUDED_ANALYZERS: "spotbugs"
-#
-#include:
-#  - template: Security/SAST.gitlab-ci.yml
-#  - project: 'templates/ci'
-#    file: 'DockerInDockerTemplate.yml'
+   MAVEN_REPO_PATH: ./.m2/repository
+   JAVA_OPTS: -XX:MaxRAMPercentage=90
+   SAST_EXCLUDED_ANALYZERS: "spotbugs"
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - project: 'templates/ci'
+    file: 'DockerInDockerTemplate.yml'
 
 stages:
-#   - build
-#   - test
-#   - release
-#   - notify
+   - build
+   - test
+   - release
+   - notify
    - deploy
-#
-#build:
-#   stage: build
-#   script:
-#    - echo "ARTIFACT_JOB_ID=${CI_JOB_ID}" > CI_JOB_ID.txt
-#    - cd backend
-#    - mvn package -Dversion.application=${VERSION} -Dmaven.repo.local=${MAVEN_REPO_PATH}
-#    - cd ..
-#    - mkdir sausage-store-${VERSION}
-#    - mv backend/target/sausage-store-${VERSION}.jar sausage-store-${VERSION}/sausage-store-${VERSION}.jar
-#   artifacts:
-#    paths:
-#      - ${CI_PROJECT_DIR}/.m2/
-#      - sausage-store-${VERSION}/sausage-store-${VERSION}.jar
-#    reports:
-#      dotenv: CI_JOB_ID.txt
-#   rules:
-#    - changes:
-#      - backend/*
-#
-#build-backend:
-#  stage: build
-#  image: docker:20.10.12-dind-rootless
-#  before_script:
-#    - until docker info; do sleep 1; done
-#    # переменные CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY генерятся Гитлабом, их задавать не надо
-#    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-#  script:
-#    - cd backend
-#    - >
-#      docker build
-#      --build-arg VERSION=$VERSION
-#      --tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
-#      .
-#    - docker push $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
-#  rules:
-#    - changes:
-#      - backend/*
-#
-#sonarqube-backend-sast:
-#   stage: test
-#   image: maven:3.8-openjdk-16
-#   variables:
-#      SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/backend"
-#      GIT_DEPTH: "0"
-#   script:
-#    - cd backend
-#    - >
-#      mvn verify sonar:sonar
-#      -Dsonar.qualitygate.wait=true
-#      -Dsonar.projectKey=${SONAR_PROJECT_KEY_BACKEND}
-#      -Dsonar.host.url=${SONARQUBE_URL}
-#      -Dsonar.login=${SONAR_LOGIN}
-#      -Dsonar.projectName=${SONAR_BACKEND}
-#
-#upload-backend-latest:
-#  variables:
-#    GIT_STRATEGY: none
-#  image: docker:20.10.12-dind-rootless
-#  stage: release
-#  before_script:
-#    - until docker info; do sleep 1; done
-#    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-#  script:
-#    - docker pull $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
-#    # если образ прошел проверки в CI (сканирование, тесты и т.д), то тегаем latest
-#    - docker tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE/sausage-backend:latest
-#    - docker push $CI_REGISTRY_IMAGE/sausage-backend:latest
-#
-#notify-slack: # задача с именем upload-release
-#   stage: notify
-#   script:
-#    - > # сохранение артефакта в package registry
-#      curl -X POST -H "Content-type: application/json"
-#      -d "{\"text\": \"Вышла новая версия backend сосисочной — ${VERSION}. Скачать бэкенд можно по ссылке — ${NEXUS_REPO_URL_BACK}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar\" }" https://hooks.slack.com/services/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
-#   rules:
-#      - changes:
-#           - backend/*
+
+build:
+   stage: build
+   script:
+    - echo "ARTIFACT_JOB_ID=${CI_JOB_ID}" > CI_JOB_ID.txt
+    - cd backend
+    - mvn package -Dversion.application=${VERSION} -Dmaven.repo.local=${MAVEN_REPO_PATH}
+    - cd ..
+    - mkdir sausage-store-${VERSION}
+    - mv backend/target/sausage-store-${VERSION}.jar sausage-store-${VERSION}/sausage-store-${VERSION}.jar
+   artifacts:
+    paths:
+      - ${CI_PROJECT_DIR}/.m2/
+      - sausage-store-${VERSION}/sausage-store-${VERSION}.jar
+    reports:
+      dotenv: CI_JOB_ID.txt
+   rules:
+    - changes:
+      - backend/*
+
+build-backend:
+  stage: build
+  image: docker:20.10.12-dind-rootless
+  before_script:
+    - until docker info; do sleep 1; done
+    # переменные CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY генерятся Гитлабом, их задавать не надо
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - cd backend
+    - >
+      docker build
+      --build-arg VERSION=$VERSION
+      --tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
+      .
+    - docker push $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
+  rules:
+    - changes:
+      - backend/*
+
+sonarqube-backend-sast:
+   stage: test
+   image: maven:3.8-openjdk-16
+   variables:
+      SONAR_USER_HOME: "${CI_PROJECT_DIR}/.m2/backend"
+      GIT_DEPTH: "0"
+   script:
+    - cd backend
+    - >
+      mvn verify sonar:sonar
+      -Dsonar.qualitygate.wait=true
+      -Dsonar.projectKey=${SONAR_PROJECT_KEY_BACKEND}
+      -Dsonar.host.url=${SONARQUBE_URL}
+      -Dsonar.login=${SONAR_LOGIN}
+      -Dsonar.projectName=${SONAR_BACKEND}
+
+upload-backend-latest:
+  variables:
+    GIT_STRATEGY: none
+  image: docker:20.10.12-dind-rootless
+  stage: release
+  before_script:
+    - until docker info; do sleep 1; done
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker pull $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA
+    # если образ прошел проверки в CI (сканирование, тесты и т.д), то тегаем latest
+    - docker tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE/sausage-backend:latest
+    - docker push $CI_REGISTRY_IMAGE/sausage-backend:latest
+
+notify-slack: # задача с именем upload-release
+   stage: notify
+   script:
+    - > # сохранение артефакта в package registry
+      curl -X POST -H "Content-type: application/json"
+      -d "{\"text\": \"Вышла новая версия backend сосисочной — ${VERSION}. Скачать бэкенд можно по ссылке — ${NEXUS_REPO_URL_BACK}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar\" }" https://hooks.slack.com/services/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
+   rules:
+      - changes:
+           - backend/*
 
 deploy-backend:
   stage: deploy

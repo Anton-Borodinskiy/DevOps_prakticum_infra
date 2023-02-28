@@ -116,7 +116,7 @@ deploy-backend:
   script:
     - cat docker-compose.yml | ssh ${DEV_USER}@${DEV_HOST} 'cat - > ~/docker-compose.yml'
     - ssh ${DEV_USER}@${DEV_HOST}
-       export "SPRING_DATASOURCE_URL=${PSQL_DATASOURCE}";
+      "export "SPRING_DATASOURCE_URL=${PSQL_DATASOURCE}";
        export "SPRING_DATASOURCE_USERNAME=${PSQL_USER}";
        export "CI_REGISTRY=${CI_REGISTRY}";
        export "CI_REGISTRY_USER=${CI_REGISTRY_USER}";

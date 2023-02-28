@@ -3,7 +3,7 @@ version: "3.7"
 services:
   backend-green:
     image: gitlab.praktikum-services.ru:5050/anton-borodinskiy/sausage-store/sausage-backend:latest
-    container_name: sausage-backend-green
+    container_name: backend-green
     environment:
       VIRTUAL_HOST: sausage-store
       VIRTUAL_PORT: 8080
@@ -24,7 +24,7 @@ services:
 
   backend-blue:
     image: gitlab.praktikum-services.ru:5050/anton-borodinskiy/sausage-store/sausage-backend:latest
-    container_name: sausage-backend-blue
+    container_name: backend-blue
     environment:
       VIRTUAL_HOST: sausage-store
       VIRTUAL_PORT: 8080

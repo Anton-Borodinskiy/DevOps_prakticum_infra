@@ -1,13 +1,14 @@
 #!/bin/bash
 set +e
 
+echo -e "PSQL_DATASOURCE=${SPRING_DATASOURCE_URL}\nVAULT_TOKEN=${SPRING_CLOUD_VAULT_TOKEN}" | sudo tee /home/student/blue_green_env
+
+while read LINE; do export "$LINE"; done < /home/student/blue_green_env
+
 sudo docker login ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
 sudo docker network create -d bridge sausage-store || true
 docker-compose pull
 
-echo -e "PSQL_DATASOURCE=${SPRING_DATASOURCE_URL}\nVAULT_TOKEN=${SPRING_CLOUD_VAULT_TOKEN}" | sudo tee /home/student/blue_green_env
-
-while read LINE; do export "$LINE"; done < /home/student/blue_green_env
 
 if [[ $(docker container inspect -f '{{.State.Running}}' backend-blue) = true ]]
 then
@@ -31,7 +32,7 @@ then
     until [ "$blue_status" = "healthy" ]
     do
       blueStatus=$(docker container inspect -f '{{.State.Health.Status}}' backend-blue)
-      echo $blue_status
+      echo $blueStatus
       sleep 10
     done
     echo "Blue container is up!"

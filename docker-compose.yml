@@ -11,7 +11,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${PSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${PSQL_PASS}
       SPRING_DATASOURCE_URL: "jdbc:postgresql://rc1b-5y9bn5sgesewht1l.mdb.yandexcloud.net:6432/Borodinskiy26"
-      SPRING_CLOUD_VAULT_TOKEN: "hvs.CAESINsTQ_v73biUShEGBXnm10Yy15bh_D2pE6M2dwxs4lwGGh4KHGh2cy5mQkpDZWJyRVJCQm5nbDFWNUxGZ21pTTM"
+      SPRING_CLOUD_VAULT_TOKEN: "hvs.CAESIF84qHDo3pTUP_8Wz7w-ibHlM49f5TFEoyOIM7BjvpTIGh4KHGh2cy5KeXZMRlR1RmIxbEpQN3I4V0lISWJqcE4"
       SPRING_FLYWAY_BASELINE-ON-MIGRATE: "true"
     healthcheck:
       test: curl --fail -s http://localhost:8080/actuator/health
@@ -32,7 +32,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${PSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${PSQL_PASS}
       SPRING_DATASOURCE_URL: "jdbc:postgresql://rc1b-5y9bn5sgesewht1l.mdb.yandexcloud.net:6432/Borodinskiy26"
-      SPRING_CLOUD_VAULT_TOKEN: "hvs.CAESINsTQ_v73biUShEGBXnm10Yy15bh_D2pE6M2dwxs4lwGGh4KHGh2cy5mQkpDZWJyRVJCQm5nbDFWNUxGZ21pTTM"
+      SPRING_CLOUD_VAULT_TOKEN: "hvs.CAESIF84qHDo3pTUP_8Wz7w-ibHlM49f5TFEoyOIM7BjvpTIGh4KHGh2cy5KeXZMRlR1RmIxbEpQN3I4V0lISWJqcE4"
       SPRING_FLYWAY_BASELINE-ON-MIGRATE: "true"
     healthcheck:
       test: curl --fail -s http://localhost:8080/actuator/health

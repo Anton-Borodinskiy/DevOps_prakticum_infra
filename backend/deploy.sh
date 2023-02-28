@@ -5,7 +5,7 @@ sudo docker login ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
 sudo docker network create -d bridge sausage-store || true
 docker-compose pull
 
-echo -e "PSQL_DATASOURCE=${PSQL_DATASOURCE}\VAULT_TOKEN=${VAULT_TOKEN}" | sudo tee /home/student/blue_green_env
+echo -e "PSQL_DATASOURCE=${SPRING_DATASOURCE_URL}\VAULT_TOKEN=${SPRING_CLOUD_VAULT_TOKEN}" | sudo tee /home/student/blue_green_env
 
 while read LINE; do export "$LINE"; done < /home/student/blue_green_env
 

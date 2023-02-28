@@ -2,7 +2,9 @@
 set +e
 
 sudo docker login ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+
 sudo docker network create -d bridge sausage-store || true
+
 docker-compose pull
 
 {

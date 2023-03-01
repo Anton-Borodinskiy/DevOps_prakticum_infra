@@ -11,6 +11,7 @@ RUN curl https://storage.yandexcloud.net/cloud-certs/CA.pem -o YandexInternalRoo
 
 # release
 FROM openjdk:16-jdk-alpine
+RUN apk --no-cache add curl
 ARG VERSION=${VERSION}
 WORKDIR /app
 COPY --from=builder /usr/src/app/YandexInternalRootCA.crt .

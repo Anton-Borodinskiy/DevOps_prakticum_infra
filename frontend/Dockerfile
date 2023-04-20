@@ -5,8 +5,7 @@ COPY . .
 RUN npm install
 RUN npm run build
 
-FROM nginxproxy/nginx-proxy
+FROM nginx:latest
 COPY --from=builder /usr/src/app/dist/frontend /usr/share/nginx/html
-COPY nginx.tmpl /app/nginx.tmpl
 
-EXPOSE 80
+EXPOSE 8080
